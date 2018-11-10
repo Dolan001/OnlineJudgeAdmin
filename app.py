@@ -38,49 +38,71 @@ def signup():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
-    if 'username' in session:
-        return redirect(url_for('home'))
-    username = request.form['username']
-    password = request.form['password']
-    cursor = con.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = '" + username + "' AND password= '" + password + "'")
-    user = cursor.fetchall()
-    if len(user) is 1:
-        session['username'] = request.form['username']
-        return redirect(url_for('home'))
-    else:
-        return 'failed'
-
-
-@app.route('/home', defaults={'page': 0}, methods=['GET'])
-@app.route('/home/page/<int:page>', methods=['GET'])
-def home(page):
-    if 'username' in session:
-        username_session = escape(session['username']).capitalize()
-        perpage = 5
-        startat = page * perpage
-        pages = page + 1
+    if request.method == 'POST':
+        error = None
+        if 'username' in session:
+            return redirect(url_for('home'))
+        username = request.form['username']
+        password = request.form['password']
         cursor = con.cursor()
-        cursor.execute('SELECT * FROM articles ORDER BY id desc limit %s, %s;', (startat, perpage))
-        data = cursor.fetchall()
-        cursor.execute('SELECT id, username, sum(rating) FROM articles'
-                       ' GROUP BY username ORDER BY sum(rating) desc')
-        rating = cursor.fetchall()
-        cursor.execute('SELECT title_id, COUNT(comment) FROM comments GROUP BY title_id')
-        count_comment = cursor.fetchall()
-        cursor.execute('select id, username, count(username) from articles '
-                       'group by username order by count(username) desc')
-        count_cont = cursor.fetchall()
-        cursor.execute('select title_id, count(reaction) from reactions where reaction="1" group by title_id')
-        count_reaction = cursor.fetchall()
-        cursor.execute('select title_id, count(reaction) from reactions where reaction="-1" group by title_id')
-        count_reaction_u = cursor.fetchall()
-        return render_template('home.html', session_user_name=username_session,
-                               data=data, count_pages_article=pages, ratings=rating,
-                               count_comment=count_comment, count_cont=count_cont, page=page,
-                               count_reaction=count_reaction, count_reaction_U=count_reaction_u)
-    return redirect(url_for('login'))
+        cursor.execute("SELECT * FROM users WHERE username = '" + username + "' AND password= '" + password + "'")
+        user = cursor.fetchall()
+        if len(user) is 1:
+            session['username'] = request.form['username']
+            return redirect(url_for('home'))
+        else:
+            return 'failed'
+    else:
+        return render_template('index.html')
+
+
+@app.route('/home', defaults={'page': 0}, methods=['GET', 'POST'])
+@app.route('/home/page/<int:page>', methods=['GET', 'POST'])
+def home(page):
+    if request.method == 'GET':
+        if 'username' in session:
+            username_session = escape(session['username']).capitalize()
+            perpage = 5
+            startat = page * perpage
+            pages = page + 1
+            cursor = con.cursor(buffered=True)
+            cursor.execute('SELECT * FROM articles ORDER BY id desc limit %s, %s;', (startat, perpage))
+            data = cursor.fetchall()
+            cursor.execute('SELECT id, username, sum(rating) FROM articles'
+                           ' GROUP BY username ORDER BY sum(rating) desc')
+            rating = cursor.fetchall()
+            cursor.execute('SELECT title_id, COUNT(comment) FROM comments GROUP BY title_id')
+            count_comment = cursor.fetchall()
+            cursor.execute('select id, username, count(username) from articles '
+                           'group by username order by count(username) desc')
+            count_cont = cursor.fetchall()
+            cursor.execute('select title_id, count(reaction) from reactions where reaction="1" group by title_id')
+            count_reaction = cursor.fetchall()
+            cursor.execute('select title_id, count(reaction) from reactions where reaction="-1" group by title_id')
+            count_reaction_u = cursor.fetchall()
+            cursor.execute("SELECT distinct username FROM users")
+            nameSearch = cursor.fetchall()
+            cursor.execute("SELECT title FROM articles")
+            articleSearch = cursor.fetchall()
+            cursor.execute("SELECT distinct Category FROM articles")
+            categorySearch = cursor.fetchall()
+            return render_template('home.html', session_user_name=username_session,
+                                   data=data, count_pages_article=pages, ratings=rating,
+                                   count_comment=count_comment, count_cont=count_cont, page=page,
+                                   count_reaction=count_reaction, count_reaction_U=count_reaction_u,
+                                   nameSearch=nameSearch, articleSearch=articleSearch, categorySearch=categorySearch)
+        return redirect(url_for('login'))
+
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    search_input = request.form['input_search']
+    cursor = con.cursor()
+    sql = "select * from articles where username = %s or title = %s or Category = %s order by id desc"
+    val = (search_input, search_input, search_input)
+    cursor.execute(sql, val)
+    search_data = cursor.fetchall()
+    return render_template('search_result.html', data=search_data)
 
 
 @app.route('/home/contest', defaults={'page': 0}, methods=['GET'])
@@ -142,7 +164,10 @@ def problem(page):
 @app.route('/home/addArticle')
 def addArticle():
     username_session = escape(session['username']).capitalize()
-    return render_template('addArticle.html', session_user_name=username_session)
+    cursor = con.cursor()
+    cursor.execute("SELECT distinct Category FROM articles")
+    Category_article = cursor.fetchall()
+    return render_template('addArticle.html', session_user_name=username_session, Category_article=Category_article)
 
 
 @app.route('/uploadArticle', methods=['POST'])
@@ -152,34 +177,14 @@ def uploadArticle():
     title = request.form['title']
     editor_text = request.form['text_editor']
     text = BeautifulSoup(editor_text, "html.parser").text
+    input_category = request.form['Category']
     cursor = con.cursor()
-    sql_add_article = "INSERT INTO articles(username, title, article, time, updated_article, updated_time,rating) VALUES(%s,%s,%s,%s,%s,%s,%s)"
-    article_val = (username_session, title, text, timestamp, 'null', 'null', '5')
+    sql_add_article = "INSERT INTO articles(username, title, article, time, updated_article, updated_time,rating, Category) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
+    article_val = (username_session, title, text, timestamp, 'null', 'null', '5', input_category)
     cursor.execute(sql_add_article, article_val)
     session['title'] = request.form['title']
     con.commit()
     return redirect(url_for('home'))
-
-
-@app.route('/editArticle/<title_id>/<article_title>', methods=["POST"])
-def editArticle(title_id, article_title):
-    timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-    editor_text = request.form['text_editor']
-    text = BeautifulSoup(editor_text, "html.parser").text
-    cursor = con.cursor()
-    check_article = "select updated_article, updated_time from articles where id = %s"
-    check_article_var = (title_id,)
-    cursor.execute(check_article, check_article_var)
-    check_article_data = cursor.fetchall()
-    if check_article_data is 0:
-        sql = "insert into articles(updated_article, updated_time) values(%s, %s)"
-        val = (text, timestamp)
-        cursor.execute(sql, val)
-        con.commit()
-        return redirect(url_for('article', title_id=title_id, article_title=article_title))
-    else:
-        cursor.execute("update articles set updated_article= '"+text+"' and updated_time= '"+timestamp+"'")
-        return redirect(url_for('article', title_id=title_id, article_title=article_title))
 
 
 @app.route('/home/profile/<username>')
@@ -323,9 +328,26 @@ def unlike(title_id, title, page):
 def edit(title_id):
     username_session = escape(session['username']).capitalize()
     cursor = con.cursor()
-    cursor.execute("SELECT * FROM articles WHERE id = '" + title_id + "'")
-    article = cursor.fetchone()
-    return render_template('editArticle.html', article=article)
+    cursor.execute("SELECT distinct Category FROM articles")
+    article = cursor.fetchall()
+    cursor.execute('select * from articles where id = "'+title_id+'"')
+    article_data = cursor.fetchone()
+    return render_template('editArticle.html', article=article, article_data=article_data)
+
+
+@app.route('/editArticle/<title_id>/<article_title>', methods=["POST"])
+def editArticle(title_id, article_title):
+    timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    editor_text = request.form['text_editor']
+    input_category = request.form['input_category']
+    text = BeautifulSoup(editor_text, "html.parser").text
+    title = request.form['title']
+    cursor = con.cursor()
+    sql = 'update articles set title = %s, updated_article= %s, updated_time= %s, Category=%s where id = "'+title_id+'"'
+    val = (title, text, timestamp, input_category)
+    cursor.execute(sql, val)
+    con.commit()
+    return redirect(url_for('article', title_id=title_id, article_title=article_title))
 
 
 @app.route('/logout')

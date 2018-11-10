@@ -21,6 +21,17 @@
 #article{
     margin: 0px 30px;
     background: white;
+    overflow: no-display;
+}
+.container{
+    overflow: hidden;
+    max-height:200px;
+    position: relative;
+    border:1px solid #999;
+}
+
+#article.expanded{
+    max-height:none;
 }
 
 .article_title{

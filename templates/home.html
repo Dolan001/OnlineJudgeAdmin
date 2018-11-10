@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Forum{% endblock %}
 {% block style %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'homeStyle.css', v=9079097642) }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'homeStyle.css', v=90742) }}">
 {% endblock %}
 {% block openAcc %}
     <li>
@@ -24,23 +24,50 @@
                                     <h2 class="article_title">
                                         <a href="{{ url_for('article', article_title = data[2], title_id=data[0]) }}">{{ data[2] }}</a>
                                     </h2>
-                                    <h5 class="article_title">By <a
-                                            href="{{ url_for('profile', username=data[1]) }}"><b>{{ data[1] }}</b></a>, {{ data[4] }}
+                                    <h5 class="article_title">By
+                                        <a href="{{ url_for('profile', username=data[1]) }}">
+                                            <b>{{ data[1] }}</b>
+                                        </a>,
+                                        {% if data[6] == "null" %}
+                                            {{ data[4] }}
+                                        {% else %}
+                                            {{ data[6] }}
+                                        {% endif %}
                                     </h5>
                                 </div>
                             </div>
-                        <br>
+                            <br>
                             <div class="row">
                                 <div class="col-md-12 col-sm-12 col-xs-12" id="article_details">
-                                    <div id="article"><h4 id="div_article">{{ data[3] }}</h4></div>
+                                    <div id="article{{ data[0] }}" style="height: 40px">
+                                        <h4 id="div_article">
+                                            {% if data[5]=='null' %}
+                                                {{ data[3] }}
+                                            {% else %}
+                                                {{ data[5] }}
+                                            {% endif %}
+                                        </h4>
+                                    </div>
                                 </div>
                             </div>
+                            <script>
+                                function myFunction{{ data[0] }}() {
+                                    if (document.getElementById("article{{ data[0] }}").style.height === "auto") {
+                                        document.getElementById("article{{ data[0] }}").style.height = "40px";
+                                        document.getElementById("myBtn{{ data[0] }}").innerHTML = "Read more";
+                                    }
+                                    else {
+                                        document.getElementById("article{{ data[0] }}").style.height = "auto";
+                                        document.getElementById("myBtn{{ data[0] }}").innerHTML = "Show less";
+                                    }
+                                }
+                            </script>
                             <div class="row">
                                 <div class="col-md-12 col-sm-12 col-xs-12" id="article_react_bg">
                                     <div class="row" id="article_react">
                                         <div class="col-md-6 col-sm-6 col-xs-6">
                                             <form>
-                                                <p style="margin: 5px 30px">
+                                                <p style="margin: 10px 30px">
                                                     <span style="color: green">
                                                                 <a href="{{ url_for('like', title_id=data[0],title=data[2], page=page) }}">
                                                                     Like
@@ -66,9 +93,15 @@
                                             </form>
                                         </div>
                                         <div class="col-md-6 col-sm-6 col-xs-6">
-                                            <p style="margin-top: 5px"><span style="font-weight: bold"><a
-                                                    href="{{ url_for('profile', username=data[1]) }}">{{ data[1] }}</a></span>
-                                                <span class="pull-right" style="color: black">
+                                            <p style="margin-top: 10px">
+                                                <span style="font-weight: bold">
+                                                    <a href="{{ url_for('profile', username=data[1]) }}">{{ data[1] }}</a>
+                                                </span>
+                                                <span class="pull-right">
+                                                    <button type="button" id="myBtn{{ data[0] }}"
+                                                            onclick="myFunction{{ data[0] }}()">Read more</button>
+                                                </span>
+                                                <span class="pull-right" style="color: black; margin-right: 10px">
                                                         <a href="{{ url_for('article',article_title = data[2], title_id=data[0]) }}">
                                                             Comment
                                                             {% for count_comments in count_comment %}
@@ -117,19 +150,28 @@
                                     <td><a href="{{ url_for('problem') }}">Problem</a></td>
                                 </tr>
                                 <tr>
-                                    <td><a href="{{ url_for('contest') }}">Accident</a></td>
+                                    <td><a href="{{ url_for('contest') }}">Contest</a></td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <form>
-                                            <input type="text" class="form-control" placeholder=" Search">
-                                            <select style="margin-top: 10px" class="form-control">
-                                                <option>Select from here</option>
-                                                <option>Username</option>
-                                                <option>Article title</option>
-                                                <option>Category</option>
-                                            </select>
-                                            <input type="submit" value="Search" class="btn btn-success" style="margin-top: 10px">
+                                        <form method="post" action="/search">
+                                            <input type="text" class="form-control" placeholder=" Search"
+                                                   name="input_search"
+                                                   list="listItem">
+                                            <datalist id="listItem">
+                                                {% for name in nameSearch %}
+                                                    <option value="{{ name[0] }}"></option>
+                                                {% endfor %}
+                                                {% for article in articleSearch %}
+                                                    <option value="{{ article[0] }}"></option>
+                                                {% endfor %}
+                                                {% for category in categorySearch %}
+                                                    <option value="{{ category[0] }}"></option>
+                                                {% endfor %}
+
+                                            </datalist>
+                                            <input type="submit" value="Search" class="btn btn-success"
+                                                   style="margin-top: 10px">
                                         </form>
                                     </td>
                                 </tr>
@@ -161,10 +203,11 @@
                         </div>
                     </div>
                 </div>
-            &nbsp;
+                &nbsp;
                 <div class="row">
                     <div class="col-md-12 col-sm-12 col-xs-12">
-                        <div class="table-responsive" style="background: #ffffff; margin-left: 10px; border-radius: 5px">
+                        <div class="table-responsive"
+                             style="background: #ffffff; margin-left: 10px; border-radius: 5px">
                             <b><h3>#Top contributors</h3></b>
                             <table class="table table-bordered">
                                 <thead>

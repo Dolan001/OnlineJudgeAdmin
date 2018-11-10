@@ -31,7 +31,12 @@
                                    value="Upload">
                         </div>
                         <div class="col-md-4 col-sm-4 col-xs-4">
-                            <input type="text" class="form-control" style="margin-top: 145px" placeholder="Enter the article category">
+                            <input type="text" class="form-control" name="Category" style="margin-top: 145px" placeholder="Enter the article category" list="ItemList">
+                            <datalist id="ItemList">
+                                {% for i in Category_article %}
+                                    <option value="{{ i[0] }}"></option>
+                                {% endfor %}
+                            </datalist>
                             <br>
                             <p><b>Category will be like this : </b></p>
                             <ul>
