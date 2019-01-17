@@ -45,7 +45,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         cursor = con.cursor()
-        cursor.execute("SELECT * FROM users WHERE username = '" + username + "' AND password= '" + password + "'")
+        cursor.execute("SELECT * FROM users WHERE username = '" + username + "' AND password= '" + password + "' AND activity = '1'")
         user = cursor.fetchall()
         if len(user) is 1:
             session['username'] = request.form['username']
@@ -73,9 +73,6 @@ def home(page):
             rating = cursor.fetchall()
             cursor.execute('SELECT title_id, COUNT(comment) FROM comments GROUP BY title_id')
             count_comment = cursor.fetchall()
-            cursor.execute('select id, username, count(username) from articles '
-                           'group by username order by count(username) desc')
-            count_cont = cursor.fetchall()
             cursor.execute('select title_id, count(reaction) from reactions where reaction="1" group by title_id')
             count_reaction = cursor.fetchall()
             cursor.execute('select title_id, count(reaction) from reactions where reaction="-1" group by title_id')
@@ -86,11 +83,35 @@ def home(page):
             articleSearch = cursor.fetchall()
             cursor.execute("SELECT distinct Category FROM articles")
             categorySearch = cursor.fetchall()
+
+            cursor.execute("select * from follow where notify = '1'")
+            notification = cursor.fetchall()
+            cursor.execute("select count(notify) from follow where notify = '1'")
+            count_notification = cursor.fetchone()
+            cursor.execute("select articles.username,count(articles.username), sum(reactions.reaction)"
+                           " from articles, reactions"
+                           " where articles.id = reactions.title_id"
+                           " group by articles.username "
+                           "order by sum(reactions.reaction) + count(articles.username) desc ")
+            contribute = cursor.fetchall()
+            '''
+            cursor.execute('select id, username, count(username) from articles '
+                           'group by username order by count(username) desc')
+            count_cont = cursor.fetchall()
+            
+            cursor.execute("select distinct(articles.username), count(username) from articles"
+                           " group by articles.username")
+            con_data = cursor.fetchall()
+            '''
+            print(notification)
+
             return render_template('home.html', session_user_name=username_session,
                                    data=data, count_pages_article=pages, ratings=rating,
-                                   count_comment=count_comment, count_cont=count_cont, page=page,
+                                   count_comment=count_comment, page=page,
                                    count_reaction=count_reaction, count_reaction_U=count_reaction_u,
-                                   nameSearch=nameSearch, articleSearch=articleSearch, categorySearch=categorySearch)
+                                   nameSearch=nameSearch, articleSearch=articleSearch, categorySearch=categorySearch,
+                                   notification=notification, count_notification=count_notification,
+                                   contribute=contribute)
         return redirect(url_for('login'))
 
 
@@ -182,6 +203,7 @@ def uploadArticle():
     sql_add_article = "INSERT INTO articles(username, title, article, time, updated_article, updated_time,rating, Category) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
     article_val = (username_session, title, text, timestamp, 'null', 'null', '5', input_category)
     cursor.execute(sql_add_article, article_val)
+    # cursor.execute("update follow set notify='1' where following = '"+username_session+"'")
     session['title'] = request.form['title']
     con.commit()
     return redirect(url_for('home'))
@@ -212,13 +234,10 @@ def follow(username):
         return redirect(url_for('profile', username=username))
     else:
         if len(check_user_name_follow) is 0:
-            sql_follow = "INSERT INTO follow(following, follower) VALUES(%s,%s)"
-            val_follow = (username, username_session)
+            sql_follow = "INSERT INTO follow(following, follower, notify) VALUES(%s,%s, %s)"
+            val_follow = (username, username_session, "0")
             cursor.execute(sql_follow, val_follow)
             con.commit()
-            print("every thing is okey")
-            print(username)
-            print(username_session)
             return redirect(url_for('profile', username=username))
         else:
             print("you followed him/her before")
@@ -240,6 +259,14 @@ def article(title_id, article_title):
     con.commit()
     return render_template('article.html', data=article, username=username_session, comment=comment_data,
                            reply=reply_data, comments_count=comments_count)
+
+
+@app.route('/EndNotify/<title_id>/<article_title>', methods=['GET'])
+def EndNotify(title_id, article_title):
+    cursor = con.cursor()
+    remove = 'update follow set notify = "0" where articleId = "' + title_id + '"'
+    cursor.execute(remove)
+    return redirect(url_for('article', article_title=article_title, title_id=title_id))
 
 
 @app.route('/comment/<title_id>/<article_title>', methods=['POST'])
