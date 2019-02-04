@@ -10,7 +10,7 @@
 Create a project folder and a venv folder within:<br>
 mkdir myproject<br>
 cd myproject<br>
-python3 -m venv venv<br>
+<p style="background-color:gray">python3 -m venv venv</p><br>
 On Windows:<br>
 py -3 -m venv venv<br>
 If you needed to install virtualenv because you are on an older version of Python, use the following command instead:<br>
