@@ -47,13 +47,13 @@ sudo apt-get install python-virtualenv
 sudo yum install python-virtualenv
 
 # Arch
-sudo pacman -S python-virtualenv
-If you are on Mac OS X or Windows, download get-pip.py, then:
-sudo python2 Downloads/get-pip.py
-sudo python2 -m pip install virtualenv
-On Windows, as an administrator:
-\Python27\python.exe Downloads\get-pip.py
-\Python27\python.exe -m pip install virtualenv
+sudo pacman -S python-virtualenv<br>
+If you are on Mac OS X or Windows, download get-pip.py, then:<br>
+sudo python2 Downloads/get-pip.py<br>
+sudo python2 -m pip install virtualenv<br>
+On Windows, as an administrator:<br>
+\Python27\python.exe Downloads\get-pip.py<br>
+\Python27\python.exe -m pip install virtualenv<br>
 Now you can return above and Create an environment.
 
 
