@@ -1,4 +1,4 @@
-Dependencies
+<h1>Dependencies</h1><br>
 These distributions will be installed automatically when installing Flask.
 •	Werkzeug implements WSGI, the standard Python interface between applications and servers.
 •	Jinja is a template language that renders the pages your application serves.
