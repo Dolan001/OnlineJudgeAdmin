@@ -1,22 +1,22 @@
-<h1>Dependencies</h1><br>
-These distributions will be installed automatically when installing Flask.
-•	Werkzeug implements WSGI, the standard Python interface between applications and servers.
-•	Jinja is a template language that renders the pages your application serves.
-•	MarkupSafe comes with Jinja. It escapes untrusted input when rendering templates to avoid injection attacks.
-•	ItsDangerous securely signs data to ensure its integrity. This is used to protect Flask’s session cookie.
-•	Click is a framework for writing command line applications. It provides the flask command and allows adding custom management commands
+<h3>Dependencies</h3><br>
+<p>These distributions will be installed automatically when installing Flask.</p><br>
+•	Werkzeug implements WSGI, the standard Python interface between applications and servers.<br>
+•	Jinja is a template language that renders the pages your application serves.<br>
+•	MarkupSafe comes with Jinja. It escapes untrusted input when rendering templates to avoid injection attacks.<br>
+•	ItsDangerous securely signs data to ensure its integrity. This is used to protect Flask’s session cookie.<br>
+•	Click is a framework for writing command line applications. It provides the flask command and allows adding custom management commands.<br>
 
-Create an environment
-Create a project folder and a venv folder within:
-mkdir myproject
-cd myproject
-python3 -m venv venv
-On Windows:
-py -3 -m venv venv
-If you needed to install virtualenv because you are on an older version of Python, use the following command instead:
-virtualenv venv
-On Windows:
-\Python27\Scripts\virtualenv.exe venv
+<h3>Create an environment</h3>
+Create a project folder and a venv folder within:<br>
+mkdir myproject<br>
+cd myproject<br>
+python3 -m venv venv<br>
+On Windows:<br>
+py -3 -m venv venv<br>
+If you needed to install virtualenv because you are on an older version of Python, use the following command instead:<br>
+virtualenv venv<br>
+On Windows:<br>
+\Python27\Scripts\virtualenv.exe venv<br>
 
 Activate the environment
 Before you work on your project, activate the corresponding environment:
