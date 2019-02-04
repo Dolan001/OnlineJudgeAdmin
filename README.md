@@ -10,33 +10,36 @@
 Create a project folder and a venv folder within:<br>
 mkdir myproject<br>
 cd myproject<br>
-<p style="background-color:gray">python3 -m venv venv</p><br>
+python3 -m venv venv<br>
+<br>
 On Windows:<br>
 py -3 -m venv venv<br>
+<br>
 If you needed to install virtualenv because you are on an older version of Python, use the following command instead:<br>
 virtualenv venv<br>
 On Windows:<br>
 \Python27\Scripts\virtualenv.exe venv<br>
 
-Activate the environment
+<h3>Activate the environment</h3><br>
 Before you work on your project, activate the corresponding environment:
 . venv/bin/activate
 On Windows:
 venv\Scripts\activate
 Your shell prompt will change to show the name of the activated environment.
 
-Install Flask
-Within the activated environment, use the following command to install Flask:
-pip install Flask
-Flask is now installed. Check out the Quickstart or go to the Documentation Overview.
+<h3>Install Flask</h3><br>
+Within the activated environment, use the following command to install Flask:<br>
+pip install Flask<br>
+Flask is now installed. Check out the Quickstart or go to the Documentation Overview.<br>
 
-Living on the edge
-If you want to work with the latest Flask code before it’s released, install or update the code from the master branch:
-pip install -U https://github.com/pallets/flask/archive/master.tar.gz
+<h3>Living on the edge</h3>
+If you want to work with the latest Flask code before it’s released, install or update the code from the master branch:<br>
+pip install -U https://github.com/pallets/flask/archive/master.tar.gz<br>
 
-Install virtualenv
-If you are using Python 2, the venv module is not available. Instead, install virtualenv.
-On Linux, virtualenv is provided by your package manager:
+<h3>Install virtualenv</h3><br>
+If you are using Python 2, the venv module is not available. Instead, install virtualenv.<br>
+On Linux, virtualenv is provided by your package manager:<br>
+<br>
 # Debian, Ubuntu
 sudo apt-get install python-virtualenv
 
